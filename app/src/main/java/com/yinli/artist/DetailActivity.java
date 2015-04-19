@@ -1,17 +1,66 @@
 package com.yinli.artist;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.ecloud.pulltozoomview.PullToZoomScrollViewEx;
+import com.yinli.artist.adapter.AlbumGridAdapter;
+import com.yinli.artist.data.Artist;
+import com.yinli.artist.util.ImageLoader;
 
 
 public class DetailActivity extends ActionBarActivity {
+
+    private Artist mArtist;
+    private ImageView picture;
+    private GridView gridView;
+    private TextView name, description;
+    private PullToZoomScrollViewEx scrollView;
+    private View headView, zoomView, contentView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle == null) return;
+        mArtist = bundle.getParcelable(MainListActivity.ARTISTNAME);
+        if (mArtist == null) return;
+
+        getSupportActionBar().setTitle(mArtist.getName());
+
+        scrollView = (PullToZoomScrollViewEx) findViewById(R.id.scrollView);
+        loadViewForCode();
+/*        scrollView.getPullRootView().findViewById(R.id.tv_test1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("zhuwenwu", "onClick -->");
+            }
+        });*/
+
+        DisplayMetrics localDisplayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(localDisplayMetrics);
+        int mScreenHeight = localDisplayMetrics.heightPixels;
+        int mScreenWidth = localDisplayMetrics.widthPixels;
+        LinearLayout.LayoutParams localObject = new LinearLayout.LayoutParams(mScreenWidth, (int) (9.0F * (mScreenWidth / 16.0F)));
+        scrollView.setHeaderLayoutParams(localObject);
+
+        picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
+        new ImageLoader().download(mArtist.getPicture(), picture);
+
+        gridView = (GridView) contentView.findViewById(R.id.iv_gridView);
+        AlbumGridAdapter adapter = new AlbumGridAdapter(this, mArtist.getAlbums());
+        gridView.setAdapter(adapter);
     }
 
     @Override
@@ -29,10 +78,20 @@ public class DetailActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            finish();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void loadViewForCode() {
+        headView = LayoutInflater.from(this).inflate(R.layout.profile_head_view, null, false);
+        zoomView = LayoutInflater.from(this).inflate(R.layout.profile_zoom_view, null, false);
+        contentView = LayoutInflater.from(this).inflate(R.layout.profile_content_view, null, false);
+        scrollView.setHeaderView(headView);
+        scrollView.setZoomView(zoomView);
+        scrollView.setScrollContentView(contentView);
     }
 }
