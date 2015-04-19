@@ -1,14 +1,16 @@
 package com.yinli.artist;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.yinli.artist.adapter.ArtistListAdapter;
 import com.yinli.artist.data.Album;
 import com.yinli.artist.data.Artist;
 import com.yinli.artist.util.JSONHelper;
@@ -25,51 +27,52 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-public class MainListActivity extends ActionBarActivity {
+public class MainListActivity extends ActionBarActivity implements AdapterView.OnItemClickListener{
+
+    public final static String ARTISTNAME = "current_artist";
 
     private final static String TAG = "Debugging";
     private final static String ERROR = "Error";
 
-    private ArrayList<Artist> artists;
-    private ArrayList<Album> albums;
+    private ArrayList<Artist> mArtists;
+    private ArrayList<Album> mAlbums;
     private ListView mainList;
+    private ArtistListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_list);
 
-        mainList = (ListView) findViewById(R.id.artistList);
-
         init();
+        mainList = (ListView) findViewById(R.id.artistList);
+        mainList.setOnItemClickListener(this);
     }
 
     private void init() {
-        artists = new ArrayList<>();
-        albums = new ArrayList<>();
+        mArtists = new ArrayList<>();
+        mAlbums = new ArrayList<>();
         new LoadHttpGet().execute("http://i.img.co/data/data.json");
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_list, menu);
-        return true;
+    private void loadList() {
+        mAdapter = new ArtistListAdapter(MainListActivity.this, mArtists, R.layout.list_item);
+        mainList.setAdapter(mAdapter);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Artist artist = mArtists.get(position);
+        ArrayList<Album> albums = new ArrayList<>();
+        for(int i = 0; i < mAlbums.size(); i++) {
+            if (mAlbums.get(i).getArtistId() == artist.getId()) {
+                albums.add(mAlbums.get(i));
+            }
         }
-
-        return super.onOptionsItemSelected(item);
+        artist.setAlbums(albums);
+        Intent intent = new Intent(MainListActivity.this, DetailActivity.class);
+        intent.putExtra(ARTISTNAME, artist);
+        startActivity(intent);
     }
 
     class LoadHttpGet extends AsyncTask<String, String, String> {
@@ -101,11 +104,9 @@ public class MainListActivity extends ActionBarActivity {
             super.onPostExecute(result);
             if (!TextUtils.equals(result, ERROR) && result != null) {
                 JSONHelper helper = new JSONHelper();
-                artists = helper.artistsJSONParser(result);
-                albums = helper.albumsJSONParser(result);
-                for (int i=0; i<artists.size(); i++) {
-                    Log.e("Artist", artists.get(i).getName());
-                }
+                mArtists = helper.artistsJSONParser(result);
+                mAlbums = helper.albumsJSONParser(result);
+                loadList();
             }
         }
     }
