@@ -1,8 +1,25 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainListActivity">
+
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<com.yinli.artist.ui.ExpandableHeightGridView-->
+            <!--android:id="@+id/iv_gridView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:numColumns="2"-->
+            <!--android:verticalSpacing="5dp"-->
+            <!--android:isScrollContainer="false"-->
+            <!--android:gravity="center"-->
+            <!--android:stretchMode="columnWidth" />-->
+
+    <!--</ScrollView>-->
 
     <ListView
         android:id="@+id/artistList"
@@ -14,4 +31,4 @@
 
     </ListView>
 
-</RelativeLayout>
+</LinearLayout>

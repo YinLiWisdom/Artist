@@ -6,13 +6,11 @@
     </style>
 
     <style name="ListMainTitle">
-        <item name="android:textColor">@android:color/white</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAppearance">?android:textAppearanceLarge</item>
     </style>
 
     <style name="ListSubTitle">
-        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="TabTitle">

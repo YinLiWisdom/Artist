@@ -8,11 +8,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ListView;
 
+import com.yinli.artist.adapter.AlbumGridAdapter;
 import com.yinli.artist.adapter.ArtistListAdapter;
 import com.yinli.artist.data.Album;
 import com.yinli.artist.data.Artist;
+import com.yinli.artist.ui.ExpandableHeightGridView;
 import com.yinli.artist.util.JSONHelper;
 
 import org.apache.http.HttpResponse;
@@ -58,6 +61,11 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
     private void loadList() {
         mAdapter = new ArtistListAdapter(MainListActivity.this, mArtists, R.layout.list_item);
         mainList.setAdapter(mAdapter);
+
+//        ExpandableHeightGridView gridView = (ExpandableHeightGridView) findViewById(R.id.iv_gridView);
+//        gridView.setExpanded(true);
+//        AlbumGridAdapter adapter = new AlbumGridAdapter(this, mAlbums);
+//        gridView.setAdapter(adapter);
     }
 
     @Override

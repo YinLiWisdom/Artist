@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white">
 
-    <GridView
-        android:id="@+id/iv_gridView"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:numColumns="2"
-        android:verticalSpacing="5dp"
-        android:scrollbarStyle="outsideInset"
-        android:gravity="center" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

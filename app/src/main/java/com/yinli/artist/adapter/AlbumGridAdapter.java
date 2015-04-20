@@ -55,7 +55,6 @@ public class AlbumGridAdapter extends BaseAdapter {
             holder.img = (ImageView) view.findViewById(R.id.image);
             holder.txt = (TextView) view.findViewById(R.id.textBtn);
 
-
             view.setTag(holder);
         } else {
             holder = (ItemHolder) view.getTag();

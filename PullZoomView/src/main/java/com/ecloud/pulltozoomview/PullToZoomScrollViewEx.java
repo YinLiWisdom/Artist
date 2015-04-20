@@ -182,7 +182,7 @@ public class PullToZoomScrollViewEx extends PullToZoomBase<ScrollView> {
 
         mRootContainer.addView(mHeaderContainer);
         if (mContentView != null) {
-            mRootContainer.addView(mContentView);
+            mRootContainer.addView(mContentView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
         mRootContainer.setClipChildren(false);

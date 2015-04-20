@@ -17,7 +17,7 @@
 
         <TextView
             style="@style/TabTitle"
-            android:id="@+id/tv_register"
+            android:id="@+id/iv_leftTab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp"
@@ -28,7 +28,7 @@
 
         <TextView
             style="@style/TabTitle"
-            android:id="@+id/tv_login"
+            android:id="@+id/iv_rightTab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp"

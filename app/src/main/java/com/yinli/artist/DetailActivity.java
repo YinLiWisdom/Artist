@@ -1,11 +1,16 @@
 package com.yinli.artist;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -14,7 +19,10 @@ import android.widget.TextView;
 
 import com.ecloud.pulltozoomview.PullToZoomScrollViewEx;
 import com.yinli.artist.adapter.AlbumGridAdapter;
+import com.yinli.artist.adapter.DetailPagerAdapter;
 import com.yinli.artist.data.Artist;
+import com.yinli.artist.ui.ExpandableHeightGridView;
+import com.yinli.artist.ui.ExpandableHeightViewPager;
 import com.yinli.artist.util.ImageLoader;
 
 
@@ -22,10 +30,12 @@ public class DetailActivity extends ActionBarActivity {
 
     private Artist mArtist;
     private ImageView picture;
-    private GridView gridView;
+    private ExpandableHeightGridView gridView;
     private TextView name, description;
     private PullToZoomScrollViewEx scrollView;
     private View headView, zoomView, contentView;
+    private ViewPager viewPager;
+    private FragmentPagerAdapter pagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,12 +51,27 @@ public class DetailActivity extends ActionBarActivity {
 
         scrollView = (PullToZoomScrollViewEx) findViewById(R.id.scrollView);
         loadViewForCode();
-/*        scrollView.getPullRootView().findViewById(R.id.tv_test1).setOnClickListener(new View.OnClickListener() {
+
+        picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
+        new ImageLoader().download(mArtist.getPicture(), picture);
+
+        viewPager = (ViewPager) contentView.findViewById(R.id.viewPager);
+        pagerAdapter = new DetailPagerAdapter(getSupportFragmentManager(), mArtist);
+        viewPager.setAdapter(pagerAdapter);
+
+        scrollView.getPullRootView().findViewById(R.id.iv_leftTab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("zhuwenwu", "onClick -->");
+                viewPager.setCurrentItem(0);
             }
-        });*/
+        });
+
+        scrollView.getPullRootView().findViewById(R.id.iv_rightTab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewPager.setCurrentItem(1);
+            }
+        });
 
         DisplayMetrics localDisplayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(localDisplayMetrics);
@@ -54,13 +79,6 @@ public class DetailActivity extends ActionBarActivity {
         int mScreenWidth = localDisplayMetrics.widthPixels;
         LinearLayout.LayoutParams localObject = new LinearLayout.LayoutParams(mScreenWidth, (int) (9.0F * (mScreenWidth / 16.0F)));
         scrollView.setHeaderLayoutParams(localObject);
-
-        picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
-        new ImageLoader().download(mArtist.getPicture(), picture);
-
-        gridView = (GridView) contentView.findViewById(R.id.iv_gridView);
-        AlbumGridAdapter adapter = new AlbumGridAdapter(this, mArtist.getAlbums());
-        gridView.setAdapter(adapter);
     }
 
     @Override
