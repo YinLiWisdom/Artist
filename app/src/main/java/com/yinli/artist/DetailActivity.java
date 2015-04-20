@@ -1,24 +1,18 @@
 package com.yinli.artist;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ecloud.pulltozoomview.PullToZoomScrollViewEx;
-import com.yinli.artist.adapter.AlbumGridAdapter;
 import com.yinli.artist.adapter.DetailPagerAdapter;
 import com.yinli.artist.data.Artist;
 import com.yinli.artist.ui.ExpandableHeightGridView;
@@ -34,7 +28,7 @@ public class DetailActivity extends ActionBarActivity {
     private TextView name, description;
     private PullToZoomScrollViewEx scrollView;
     private View headView, zoomView, contentView;
-    private ViewPager viewPager;
+    private ExpandableHeightViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
 
     @Override
@@ -55,7 +49,7 @@ public class DetailActivity extends ActionBarActivity {
         picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
         new ImageLoader().download(mArtist.getPicture(), picture);
 
-        viewPager = (ViewPager) contentView.findViewById(R.id.viewPager);
+        viewPager = (ExpandableHeightViewPager) contentView.findViewById(R.id.viewPager);
         pagerAdapter = new DetailPagerAdapter(getSupportFragmentManager(), mArtist);
         viewPager.setAdapter(pagerAdapter);
 
@@ -75,7 +69,6 @@ public class DetailActivity extends ActionBarActivity {
 
         DisplayMetrics localDisplayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(localDisplayMetrics);
-        int mScreenHeight = localDisplayMetrics.heightPixels;
         int mScreenWidth = localDisplayMetrics.widthPixels;
         LinearLayout.LayoutParams localObject = new LinearLayout.LayoutParams(mScreenWidth, (int) (9.0F * (mScreenWidth / 16.0F)));
         scrollView.setHeaderLayoutParams(localObject);

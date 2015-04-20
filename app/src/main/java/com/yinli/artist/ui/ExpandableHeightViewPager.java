@@ -3,10 +3,8 @@ package com.yinli.artist.ui;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * Created by yinli on 20/04/15.
@@ -14,7 +12,7 @@ import android.view.ViewGroup;
 
 public class ExpandableHeightViewPager extends ViewPager {
 
-    boolean expanded = false;
+    private static final String TAG = "ViewPager";
 
     public ExpandableHeightViewPager(Context context)
     {
@@ -26,34 +24,25 @@ public class ExpandableHeightViewPager extends ViewPager {
         super(context, attrs);
     }
 
-    public boolean isExpanded()
-    {
-        return expanded;
-    }
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
-        if (isExpanded())
-        {
-            // Calculate entire height by providing a very large height hint.
-            // View.MEASURED_SIZE_MASK represents the largest height possible.
-            int expandSpec = View.MeasureSpec.makeMeasureSpec(MEASURED_SIZE_MASK,
-                    View.MeasureSpec.AT_MOST);
-            super.onMeasure(widthMeasureSpec, expandSpec);
+        int height = 0;
+        Log.i(TAG, "getChildCount() = " + getChildCount() + "");
+        for(int i = 0; i < getChildCount(); i++) {
 
-            ViewGroup.LayoutParams params = getLayoutParams();
-            params.height = getMeasuredHeight();
+            View child = getChildAt(i);
+            child.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+            int h = child.getMeasuredHeight();
+            Log.i(TAG, "getMeasuredHeight() = " + h + "");
+            height = Math.max(h, height);
         }
-        else
-        {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        }
+
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    public void setExpanded(boolean expanded)
-    {
-        this.expanded = expanded;
-    }
 }
 

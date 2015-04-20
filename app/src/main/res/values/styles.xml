@@ -7,7 +7,7 @@
 
     <style name="ListMainTitle">
         <item name="android:textStyle">bold</item>
-        <item name="android:textAppearance">?android:textAppearanceLarge</item>
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
     </style>
 
     <style name="ListSubTitle">
@@ -16,5 +16,10 @@
     <style name="TabTitle">
         <item name="android:textAppearance">?android:textAppearanceMedium</item>
         <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="LabelText">
+        <item name="android:textAppearance">?android:textAppearanceMedium</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>
