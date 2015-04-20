@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import com.yinli.artist.adapter.DetailPagerAdapter;
 import com.yinli.artist.data.Artist;
 import com.yinli.artist.ui.CustomGridView;
 import com.yinli.artist.ui.CustomViewPager;
+import com.yinli.artist.util.BitmapHelper;
 import com.yinli.artist.util.ImageLoader;
 
 
@@ -49,12 +51,22 @@ public class DetailActivity extends ActionBarActivity {
         loadViewForCode();
 
         picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
-        if (!TextUtils.isEmpty(mArtist.getPicture())) {
-            Bitmap bitmap = new ImageLoader(this).loadImage(picture, mArtist.getPicture());
-            if (bitmap != null) {
-                picture.setImageBitmap(bitmap);
+        ViewTreeObserver observer = picture.getViewTreeObserver();
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                picture.getViewTreeObserver().removeOnPreDrawListener(this);
+                if (!TextUtils.isEmpty(mArtist.getPicture())) {
+                    Bitmap bitmap = new ImageLoader(DetailActivity.this).loadImage(picture, mArtist.getPicture());
+                    if (bitmap != null) {
+                        Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int) picture.getWidth(), 0);
+                        picture.setImageBitmap(bmp);
+                    }
+                }
+                return true;
             }
-        }
+        });
+
 
         viewPager = (CustomViewPager) contentView.findViewById(R.id.viewPager);
         pagerAdapter = new DetailPagerAdapter(getSupportFragmentManager(), mArtist);

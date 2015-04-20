@@ -3,6 +3,7 @@ package com.yinli.artist;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,7 @@ public class DetailsFragment extends Fragment {
         name.setText(mArtist.getName());
         genres.setText(mArtist.getGenres());
         description.setText(Html.fromHtml(mArtist.getDescription()));
+        description.setMovementMethod(LinkMovementMethod.getInstance());
         return view;
     }
 

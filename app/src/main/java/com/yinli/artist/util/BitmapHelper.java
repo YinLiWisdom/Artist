@@ -28,7 +28,7 @@ public class BitmapHelper {
             matrix.postScale(scaleWidth, scaleHeight);
         }
 
-        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
-        return resizedBitmap;
+        return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+
     }
 }

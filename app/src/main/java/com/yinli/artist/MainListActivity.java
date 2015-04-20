@@ -111,23 +111,28 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
         titanicTextView.setVisibility(View.INVISIBLE);
     }
 
-    class LoadHttpGet extends AsyncTask<String, String, String> {
+    class LoadHttpGet extends AsyncTask<String, String, Boolean> {
         @Override
-        protected String doInBackground(String... urls) {
+        protected Boolean doInBackground(String... urls) {
             HttpGet httpGet = new HttpGet(urls[0]);
             try {
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpResponse httpResponse = httpClient.execute(httpGet);
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     String strResult = EntityUtils.toString(httpResponse.getEntity());
-                    return strResult;
-                } else return ERROR;
+                    if(!TextUtils.isEmpty(strResult) && strResult != null) {
+                        JSONHelper helper = new JSONHelper();
+                        mArtists = helper.artistsJSONParser(strResult);
+                        mAlbums = helper.albumsJSONParser(strResult);
+                        return true;
+                    }
+                } else return false;
             } catch (ClientProtocolException e) {
                 Log.e(TAG, e.getMessage());
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             }
-            return null;
+            return false;
         }
 
         @Override
@@ -137,12 +142,9 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
         }
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
-            if (!TextUtils.equals(result, ERROR) && result != null) {
-                JSONHelper helper = new JSONHelper();
-                mArtists = helper.artistsJSONParser(result);
-                mAlbums = helper.albumsJSONParser(result);
+            if (result) {
                 loadList();
             }
             endLoading();

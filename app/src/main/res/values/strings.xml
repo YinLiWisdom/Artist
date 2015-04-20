@@ -16,4 +16,5 @@
 
     <string name="connection_error_text">Check your connection and try again.</string>
     <string name="connection_error_button">Retry</string>
+    <string name="empty_grid_view_text">No Albums</string>
 </resources>

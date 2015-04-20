@@ -90,7 +90,7 @@ public class Artist implements Parcelable {
             mArtist.picture = in.readString();
             mArtist.name = in.readString();
             mArtist.description = in.readString();
-            mArtist.albums = in.readArrayList(null);
+            mArtist.albums = in.readArrayList(getClass().getClassLoader());
             return mArtist;
         }
 

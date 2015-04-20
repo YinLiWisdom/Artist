@@ -40,6 +40,7 @@ public class AlbumsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.profile_content_albums_view, container, false);
         CustomGridView gridView = (CustomGridView) view.findViewById(R.id.iv_gridView);
+        gridView.setEmptyView(view.findViewById(R.id.empty_grid_view));
         gridView.setExpanded(true);
         AlbumGridAdapter adapter = new AlbumGridAdapter(getActivity(), mArtist.getAlbums());
         gridView.setAdapter(adapter);

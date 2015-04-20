@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -71,15 +72,27 @@ public class AlbumGridAdapter extends BaseAdapter {
             final String thumbUrl = album.getPicture();
 
             holder.img.setTag(thumbUrl);
-            holder.img.setImageResource(R.drawable.default_album);
-            if (!TextUtils.isEmpty(thumbUrl)) {
-                Bitmap bitmap = mImageLoader.loadImage(holder.img, thumbUrl);
-                if (bitmap != null) {
-                    float width = mContext.getResources().getDimension(R.dimen.main_list_picture_width);
-                    Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int) width, (int) width);
-                    holder.img.setImageBitmap(bmp);
+            final ImageView imageView = holder.img;
+            ViewTreeObserver observer = imageView.getViewTreeObserver();
+            observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    imageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    imageView.getLayoutParams().width = imageView.getWidth();
+                    imageView.getLayoutParams().height = imageView.getWidth();
+                    if (!TextUtils.isEmpty(thumbUrl)) {
+                        Bitmap bitmap = mImageLoader.loadImage(imageView, thumbUrl);
+                        if (bitmap != null) {
+                            // trying to use a recycled bitmap
+                            Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int) imageView.getWidth(), 0);
+                            imageView.setImageBitmap(bmp);
+                        }
+                    }
+
+                    return true;
                 }
-            }
+            });
+
 
             holder.txt.setText(album.getTitle());
         }
