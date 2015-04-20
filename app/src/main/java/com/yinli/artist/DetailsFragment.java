@@ -2,11 +2,15 @@ package com.yinli.artist;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.yinli.artist.data.Artist;
+
+import org.w3c.dom.Text;
 
 
 /**
@@ -37,7 +41,13 @@ public class DetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.profile_content_details_view, container, false);
+        TextView name = (TextView) view.findViewById(R.id.iv_name);
+        TextView genres = (TextView) view.findViewById(R.id.iv_genres);
+        TextView description = (TextView) view.findViewById(R.id.iv_description);
 
+        name.setText(mArtist.getName());
+        genres.setText(mArtist.getGenres());
+        description.setText(Html.fromHtml(mArtist.getDescription()));
         return view;
     }
 
