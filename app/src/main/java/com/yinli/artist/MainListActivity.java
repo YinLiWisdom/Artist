@@ -8,15 +8,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ListView;
 
-import com.yinli.artist.adapter.AlbumGridAdapter;
+import com.romainpiel.titanic.library.Titanic;
+import com.romainpiel.titanic.library.TitanicTextView;
 import com.yinli.artist.adapter.ArtistListAdapter;
 import com.yinli.artist.data.Album;
 import com.yinli.artist.data.Artist;
-import com.yinli.artist.ui.ExpandableHeightGridView;
 import com.yinli.artist.util.JSONHelper;
+import com.yinli.artist.util.Typefaces;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-public class MainListActivity extends ActionBarActivity implements AdapterView.OnItemClickListener{
+public class MainListActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     public final static String ARTISTNAME = "current_artist";
 
@@ -41,6 +41,8 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
     private ArrayList<Album> mAlbums;
     private ListView mainList;
     private ArtistListAdapter mAdapter;
+    private TitanicTextView titanicTextView;
+    private Titanic titanic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,7 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Artist artist = mArtists.get(position);
         ArrayList<Album> albums = new ArrayList<>();
-        for(int i = 0; i < mAlbums.size(); i++) {
+        for (int i = 0; i < mAlbums.size(); i++) {
             if (mAlbums.get(i).getArtistId() == artist.getId()) {
                 albums.add(mAlbums.get(i));
             }
@@ -81,6 +83,19 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
         Intent intent = new Intent(MainListActivity.this, DetailActivity.class);
         intent.putExtra(ARTISTNAME, artist);
         startActivity(intent);
+    }
+
+    private void startLoading() {
+        titanicTextView = (TitanicTextView) findViewById(R.id.titanicLoading);
+        titanicTextView.setTypeface(Typefaces.get(this, "Satisfy-Regular.ttf"));
+        titanicTextView.setVisibility(View.VISIBLE);
+        titanic = new Titanic();
+        titanic.start(titanicTextView);
+    }
+
+    private void endLoading() {
+        titanic.cancel();
+        titanicTextView.setVisibility(View.INVISIBLE);
     }
 
     class LoadHttpGet extends AsyncTask<String, String, String> {
@@ -105,6 +120,7 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            startLoading();
         }
 
         @Override
@@ -116,6 +132,7 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
                 mAlbums = helper.albumsJSONParser(result);
                 loadList();
             }
+            endLoading();
         }
     }
 

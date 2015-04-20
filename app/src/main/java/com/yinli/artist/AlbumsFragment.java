@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 
 import com.yinli.artist.adapter.AlbumGridAdapter;
 import com.yinli.artist.data.Artist;
-import com.yinli.artist.ui.ExpandableHeightGridView;
+import com.yinli.artist.ui.CustomGridView;
 
 
 /**
@@ -39,7 +39,7 @@ public class AlbumsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.profile_content_albums_view, container, false);
-        ExpandableHeightGridView gridView = (ExpandableHeightGridView) view.findViewById(R.id.iv_gridView);
+        CustomGridView gridView = (CustomGridView) view.findViewById(R.id.iv_gridView);
         gridView.setExpanded(true);
         AlbumGridAdapter adapter = new AlbumGridAdapter(getActivity(), mArtist.getAlbums());
         gridView.setAdapter(adapter);

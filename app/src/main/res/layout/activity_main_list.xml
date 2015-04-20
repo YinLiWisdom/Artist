@@ -1,25 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainListActivity">
-
-    <!--<ScrollView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent">-->
-
-        <!--<com.yinli.artist.ui.ExpandableHeightGridView-->
-            <!--android:id="@+id/iv_gridView"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:numColumns="2"-->
-            <!--android:verticalSpacing="5dp"-->
-            <!--android:isScrollContainer="false"-->
-            <!--android:gravity="center"-->
-            <!--android:stretchMode="columnWidth" />-->
-
-    <!--</ScrollView>-->
 
     <ListView
         android:id="@+id/artistList"
@@ -31,4 +15,14 @@
 
     </ListView>
 
-</LinearLayout>
+    <com.romainpiel.titanic.library.TitanicTextView
+        android:id="@+id/titanicLoading"
+        android:text="@string/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible"
+        android:textColor="#212121"
+        android:textSize="70sp"/>
+
+</RelativeLayout>

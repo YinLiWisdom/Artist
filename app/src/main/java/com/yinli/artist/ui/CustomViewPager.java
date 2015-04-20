@@ -10,16 +10,16 @@ import android.view.View;
  * Created by yinli on 20/04/15.
  */
 
-public class ExpandableHeightViewPager extends ViewPager {
+public class CustomViewPager extends ViewPager {
 
     private static final String TAG = "ViewPager";
 
-    public ExpandableHeightViewPager(Context context)
+    public CustomViewPager(Context context)
     {
         super(context);
     }
 
-    public ExpandableHeightViewPager(Context context, AttributeSet attrs)
+    public CustomViewPager(Context context, AttributeSet attrs)
     {
         super(context, attrs);
     }

@@ -15,8 +15,8 @@ import android.widget.TextView;
 import com.ecloud.pulltozoomview.PullToZoomScrollViewEx;
 import com.yinli.artist.adapter.DetailPagerAdapter;
 import com.yinli.artist.data.Artist;
-import com.yinli.artist.ui.ExpandableHeightGridView;
-import com.yinli.artist.ui.ExpandableHeightViewPager;
+import com.yinli.artist.ui.CustomGridView;
+import com.yinli.artist.ui.CustomViewPager;
 import com.yinli.artist.util.ImageLoader;
 
 
@@ -24,11 +24,11 @@ public class DetailActivity extends ActionBarActivity {
 
     private Artist mArtist;
     private ImageView picture;
-    private ExpandableHeightGridView gridView;
+    private CustomGridView gridView;
     private TextView name, description;
     private PullToZoomScrollViewEx scrollView;
     private View headView, zoomView, contentView;
-    private ExpandableHeightViewPager viewPager;
+    private CustomViewPager viewPager;
     private FragmentPagerAdapter pagerAdapter;
 
     @Override
@@ -49,7 +49,7 @@ public class DetailActivity extends ActionBarActivity {
         picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
         new ImageLoader().download(mArtist.getPicture(), picture);
 
-        viewPager = (ExpandableHeightViewPager) contentView.findViewById(R.id.viewPager);
+        viewPager = (CustomViewPager) contentView.findViewById(R.id.viewPager);
         pagerAdapter = new DetailPagerAdapter(getSupportFragmentManager(), mArtist);
         viewPager.setAdapter(pagerAdapter);
 

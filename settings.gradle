@@ -1,1 +1,1 @@
-include ':app', ':PullZoomView'
+include ':app', ':PullZoomView', ':TitanicLoading'

@@ -11,4 +11,6 @@
     <string name="label_name">Name: </string>
     <string name="label_genres">Genres: </string>
     <string name="label_desc">Description: </string>
+
+    <string name="loading">Loading</string>
 </resources>
