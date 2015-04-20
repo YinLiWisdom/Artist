@@ -1,9 +1,7 @@
 package com.yinli.artist.util;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
-import java.io.InputStream;
+import android.graphics.Matrix;
 
 /**
  * Artist
@@ -12,28 +10,25 @@ import java.io.InputStream;
  */
 public class BitmapHelper {
 
-    public static Bitmap resizeBitmapByView(int width, int height, InputStream inputStream) {
-        // Get the size of the image
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(inputStream, null, bmOptions);
+    public static Bitmap resizeBitmapByView(Bitmap bm, int newWidth, int newHeight) {
 
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // A matrix to manipulate
+        Matrix matrix = new Matrix();
 
-        // Figure out which way needs to be reduced less
-        int scaleFactor = 1;
-        if ((width > 0)) {
-            scaleFactor = Math.min(photoW / width, photoH / width);
+        if (scaleWidth == 0 || scaleHeight == 0) {
+            // Resize the bitmap by given width or height only
+            float scale = Math.max(scaleWidth, scaleHeight);
+            matrix.postScale(scale, scale);
+        } else {
+            // Resize the bitmap by both given width and height
+            matrix.postScale(scaleWidth, scaleHeight);
         }
 
-        // Set bitmap options to scale the image decode target
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        // Decode the JPEG file into a Bitmap
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, bmOptions);
-        return bitmap;
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+        return resizedBitmap;
     }
 }

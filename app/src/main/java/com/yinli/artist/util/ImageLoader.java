@@ -1,17 +1,28 @@
 package com.yinli.artist.util;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.yinli.artist.R;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Artist
@@ -20,80 +31,133 @@ import java.net.HttpURLConnection;
  */
 public class ImageLoader {
     private final static String TAG = "ImageDownloader";
+    private final static String UNIQUENAME = "artist_bitmap";
 
-    static Bitmap downloadBitmap(String src) {
-/*        final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-        final HttpGet getRequest = new HttpGet(url);
+    private Context context;
+    // Disk cache default size 10M
+    static final int DISK_CACHE_DEFAULT_SIZE = 10 * 1024 * 1024;
+    private ImageCache memCache;
+    private DiskLruCache diskCache;
 
+    public ImageLoader(Context context) {
+        this.context = context;
+        initMemCache(context);
+        initDiskLruCache();
+    }
+
+    /* Initialize memory cache */
+    private void initMemCache(Context context) {
+        // Calculate cache size based on available heap memory
+        int memClass = ( (ActivityManager)context.getSystemService( Context.ACTIVITY_SERVICE ) ).getMemoryClass();
+        int cacheSize = 1024 * 1024 * memClass / 8;
+        memCache = new ImageCache( cacheSize );
+    }
+
+    /* Initialize disk cache */
+    private void initDiskLruCache() {
         try {
-            HttpResponse response = client.execute(getRequest);
-            final int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
-                Log.w(TAG, "Error " + statusCode + " while retrieving bitmap from " + url);
-                return null;
+            File cacheDir = getDiskCacheDir(context, UNIQUENAME);
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
             }
+            diskCache = DiskLruCache.open(cacheDir, getAppVersion(context), 1, DISK_CACHE_DEFAULT_SIZE);
+        } catch (IOException e) {
+            Log.w(TAG, e.getMessage());
+        }
+    }
 
-            final HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                InputStream inputStream = null;
-                try {
-                    inputStream = entity.getContent();
-//                    final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    final Bitmap bitmap = BitmapHelper.resizeBitmapByView(100, 100, inputStream);
-                    return bitmap;
-                } finally {
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                    entity.consumeContent();
-                }
+    /* Get bitmap from memory cache by url */
+    public Bitmap getBitmapFromMem(String url) {
+        return memCache.get(url);
+    }
+
+    /* Put bitmap into memory cache */
+    public void putBitmapToMem(String url, Bitmap bitmap) {
+        memCache.put(url, bitmap);
+    }
+
+    /* Get bitmap from disk cache by url */
+    public Bitmap getBitmapFromDisk(String url) {
+        try {
+            String key = hashKeyForDisk(url);
+            DiskLruCache.Snapshot snapShot = diskCache.get(key);
+            if (snapShot != null) {
+                InputStream is = snapShot.getInputStream(0);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                return bitmap;
             }
         } catch (IOException e) {
-            getRequest.abort();
-            Log.w(TAG, "I/O error while retrieving bitmap from " + url, e);
-        } catch (IllegalStateException e) {
-            getRequest.abort();
-            Log.w(TAG, "Incorrect URL: " + url);
-        } catch (Exception e) {
-            getRequest.abort();
-            Log.w(TAG, "Error while retrieving bitmap from " + url, e);
-        } finally {
-            if (client != null) {
-                client.close();
-            }
+            Log.w(TAG, e.getMessage());
         }
-        return null;*/
 
-        try {
-            java.net.URL url = new java.net.URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url
-                    .openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream inputStream = connection.getInputStream();
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            return bitmap;
-        } catch (IOException e) {
-            Log.w(TAG, "Error while retrieving bitmap from " + src, e);
-        }
         return null;
     }
 
-    class LoaderTask extends AsyncTask<String, Void, Bitmap> {
-        private final WeakReference<ImageView> mImageViewReference;
+    public Bitmap loadImage(ImageView imageView, String imageUrl) {
 
-        public LoaderTask(ImageView view) {
-            this.mImageViewReference = new WeakReference<ImageView>(view);
+        Bitmap bitmap = getBitmapFromMem(imageUrl);
+        if (bitmap != null) {
+            Log.i(TAG, "Image exists in memory");
+            return bitmap;
         }
 
+        bitmap = getBitmapFromDisk(imageUrl);
+        if (bitmap != null) {
+            Log.i(TAG, "Image exists in file");
+            // Try to put the bitmap into memory cache
+            putBitmapToMem(imageUrl, bitmap);
+            return bitmap;
+        }
+
+        // Download image from internet if it has not been cached
+        if (!TextUtils.isEmpty(imageUrl)) {
+            new ImageDownloadTask(imageView).execute(imageUrl);
+        }
+
+        return null;
+    }
+
+    class ImageDownloadTask extends AsyncTask<String, Integer, Bitmap> {
+        private String imageUrl;
+        private final WeakReference<ImageView> mImageViewReference;
+
+        public ImageDownloadTask(ImageView imageView) {
+            this.mImageViewReference = new WeakReference<ImageView>(imageView);
+        }
 
         @Override
         protected Bitmap doInBackground(String... params) {
-            return downloadBitmap(params[0]);
+            try {
+                imageUrl = params[0];
+                String key = hashKeyForDisk(imageUrl);
+
+                DiskLruCache.Editor editor = diskCache.edit(key);
+                if (editor != null) {
+                    OutputStream outputStream = editor.newOutputStream(0);
+                    if (downloadUrlToStream(imageUrl, outputStream)) {
+                        editor.commit();
+                    } else {
+                        editor.abort();
+                    }
+                }
+                diskCache.flush();
+
+                Bitmap bitmap = getBitmapFromDisk(imageUrl);
+                if (bitmap != null) {
+                    putBitmapToMem(imageUrl, bitmap);
+                }
+
+                return bitmap;
+            } catch (IOException e) {
+                Log.w(TAG, e.getMessage());
+            }
+
+            return null;
         }
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
             if (isCancelled()) {
                 bitmap = null;
             }
@@ -101,40 +165,93 @@ public class ImageLoader {
             if (mImageViewReference != null) {
                 ImageView imageView = mImageViewReference.get();
                 if (imageView != null) {
-                    if (bitmap != null) imageView.setImageBitmap(bitmap);
-                    else imageView.setImageResource(R.drawable.default_thumb);
+                    if (bitmap != null) {
+                        if (imageView.getTag() != null && imageView.getTag().equals(imageUrl)) {
+                            imageView.setImageBitmap(bitmap);
+                        }
+                    }
                 }
             }
         }
 
-    }
-
-/*    private static LoaderTask getBitmapDownloaderTask(ImageView imageView) {
-        if (imageView != null) {
-            Drawable drawable = imageView.getDrawable();
-            if (drawable instanceof DownloadedDrawable) {
-                DownloadedDrawable downloadedDrawable = (DownloadedDrawable) drawable;
-                return downloadedDrawable.getBitmapDownloaderTask();
+        private boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
+            HttpURLConnection urlConnection = null;
+            BufferedOutputStream out = null;
+            BufferedInputStream in = null;
+            try {
+                final URL url = new URL(urlString);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                in = new BufferedInputStream(urlConnection.getInputStream(), 8 * 1024);
+                out = new BufferedOutputStream(outputStream, 8 * 1024);
+                int b;
+                while ((b = in.read()) != -1) {
+                    out.write(b);
+                }
+                return true;
+            } catch (final IOException e) {
+                Log.w(TAG, e.getMessage());
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                try {
+                    if (out != null) {
+                        out.close();
+                    }
+                    if (in != null) {
+                        in.close();
+                    }
+                } catch (final IOException e) {
+                    Log.w(TAG, e.getMessage());
+                }
             }
+            return false;
         }
-        return null;
     }
 
-    static class DownloadedDrawable extends ColorDrawable {
-        private final WeakReference<LoaderTask> bitmapDownloaderTaskReference;
-
-        public DownloadedDrawable(LoaderTask bitmapDownloaderTask) {
-            super(Color.BLACK);
-            bitmapDownloaderTaskReference =
-                    new WeakReference<LoaderTask>(bitmapDownloaderTask);
+    private File getDiskCacheDir(Context context, String uniqueName) {
+        String cachePath;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+                || !Environment.isExternalStorageRemovable()) {
+            cachePath = context.getExternalCacheDir().getPath();
+        } else {
+            cachePath = context.getCacheDir().getPath();
         }
+        return new File(cachePath + File.separator + uniqueName);
+    }
 
-        public LoaderTask getBitmapDownloaderTask() {
-            return bitmapDownloaderTaskReference.get();
+    private int getAppVersion(Context context) {
+        try {
+            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return info.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, e.getMessage());
         }
-    }*/
+        return 1;
+    }
 
-    public void download(String url, ImageView imageView) {
-        new LoaderTask(imageView).execute(url);
+    private String hashKeyForDisk(String key) {
+        String cacheKey;
+        try {
+            final MessageDigest mDigest = MessageDigest.getInstance("MD5");
+            mDigest.update(key.getBytes());
+            cacheKey = bytesToHexString(mDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            cacheKey = String.valueOf(key.hashCode());
+            Log.w(TAG, e.getMessage());
+        }
+        return cacheKey;
+    }
+
+    private String bytesToHexString(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(0xFF & bytes[i]);
+            if (hex.length() == 1) {
+                sb.append('0');
+            }
+            sb.append(hex);
+        }
+        return sb.toString();
     }
 }

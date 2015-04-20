@@ -1,6 +1,8 @@
 package com.yinli.artist.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,8 @@ import android.widget.TextView;
 
 import com.yinli.artist.R;
 import com.yinli.artist.data.Album;
+import com.yinli.artist.util.BitmapHelper;
+import com.yinli.artist.util.ImageLoader;
 
 import java.util.ArrayList;
 
@@ -21,10 +25,12 @@ import java.util.ArrayList;
 public class AlbumGridAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<Album> mData;
+    private final ImageLoader mImageLoader;
 
-    public AlbumGridAdapter(Context mContext, ArrayList<Album> mData) {
-        this.mContext = mContext;
+    public AlbumGridAdapter(Context context, ArrayList<Album> mData) {
+        this.mContext = context;
         this.mData = mData;
+        mImageLoader = new ImageLoader(context);
     }
 
     @Override
@@ -62,7 +68,19 @@ public class AlbumGridAdapter extends BaseAdapter {
 
         Album album = mData.get(position);
         if (album != null) {
-//            holder.img.setImageResource(item.getResourceId());
+            final String thumbUrl = album.getPicture();
+
+            holder.img.setTag(thumbUrl);
+            holder.img.setImageResource(R.drawable.default_album);
+            if (!TextUtils.isEmpty(thumbUrl)) {
+                Bitmap bitmap = mImageLoader.loadImage(holder.img, thumbUrl);
+                if (bitmap != null) {
+                    float width = mContext.getResources().getDimension(R.dimen.main_list_picture_width);
+                    Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int) width, (int) width);
+                    holder.img.setImageBitmap(bmp);
+                }
+            }
+
             holder.txt.setText(album.getTitle());
         }
         return view;

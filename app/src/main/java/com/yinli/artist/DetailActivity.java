@@ -1,8 +1,10 @@
 package com.yinli.artist;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.app.ActionBarActivity;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,7 +49,12 @@ public class DetailActivity extends ActionBarActivity {
         loadViewForCode();
 
         picture = (ImageView) zoomView.findViewById(R.id.iv_zoom);
-        new ImageLoader().download(mArtist.getPicture(), picture);
+        if (!TextUtils.isEmpty(mArtist.getPicture())) {
+            Bitmap bitmap = new ImageLoader(this).loadImage(picture, mArtist.getPicture());
+            if (bitmap != null) {
+                picture.setImageBitmap(bitmap);
+            }
+        }
 
         viewPager = (CustomViewPager) contentView.findViewById(R.id.viewPager);
         pagerAdapter = new DetailPagerAdapter(getSupportFragmentManager(), mArtist);

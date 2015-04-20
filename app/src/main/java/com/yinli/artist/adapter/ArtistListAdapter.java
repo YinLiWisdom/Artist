@@ -2,6 +2,8 @@ package com.yinli.artist.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 
 import com.yinli.artist.R;
 import com.yinli.artist.data.Artist;
+import com.yinli.artist.util.BitmapHelper;
 import com.yinli.artist.util.ImageLoader;
 
 import java.util.ArrayList;
@@ -25,12 +28,13 @@ public class ArtistListAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<Artist> mData;
     private int mLayoutResId;
-    private final ImageLoader mImageLoader = new ImageLoader();
+    private final ImageLoader mImageLoader;
 
     public ArtistListAdapter(Context context, ArrayList data, int layoutResId) {
         this.mData = data;
         this.mContext = context;
         this.mLayoutResId = layoutResId;
+        mImageLoader = new ImageLoader(context);
     }
 
     private static class ViewHolder {
@@ -58,13 +62,22 @@ public class ArtistListAdapter extends BaseAdapter {
             holder = (ViewHolder) row.getTag();
         }
 
-
         Artist artist = mData.get(position);
         if (artist != null) {
+            final String thumbUrl = artist.getPicture();
             holder.name.setText(artist.getName());
             holder.genres.setText(artist.getGenres());
 
-            mImageLoader.download(artist.getPicture(), holder.thumbnail);
+            holder.thumbnail.setTag(thumbUrl);
+            holder.thumbnail.setImageResource(R.drawable.default_avatar);
+            if (!TextUtils.isEmpty(thumbUrl)) {
+                Bitmap bitmap = mImageLoader.loadImage(holder.thumbnail, thumbUrl);
+                if (bitmap != null) {
+                    float width = mContext.getResources().getDimension(R.dimen.main_list_picture_width);
+                    Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int)width, 0);
+                    holder.thumbnail.setImageBitmap(bmp);
+                }
+            }
         }
 
         return row;

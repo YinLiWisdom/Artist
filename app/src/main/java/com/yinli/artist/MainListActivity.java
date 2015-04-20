@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.romainpiel.titanic.library.Titanic;
@@ -16,6 +17,7 @@ import com.yinli.artist.adapter.ArtistListAdapter;
 import com.yinli.artist.data.Album;
 import com.yinli.artist.data.Artist;
 import com.yinli.artist.util.JSONHelper;
+import com.yinli.artist.util.NetworkHelper;
 import com.yinli.artist.util.Typefaces;
 
 import org.apache.http.HttpResponse;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 public class MainListActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     public final static String ARTISTNAME = "current_artist";
+    private final static String JSONURL = "http://i.img.co/data/data.json";
 
     private final static String TAG = "Debugging";
     private final static String ERROR = "Error";
@@ -43,6 +46,7 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
     private ArtistListAdapter mAdapter;
     private TitanicTextView titanicTextView;
     private Titanic titanic;
+    private LinearLayout errorContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,23 +55,32 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
 
         init();
         mainList = (ListView) findViewById(R.id.artistList);
+        errorContainer = (LinearLayout) findViewById(R.id.connectionErrorContainer);
         mainList.setOnItemClickListener(this);
+
+        if (NetworkHelper.isNetworkConnected(this)) {
+            errorContainer.setVisibility(View.INVISIBLE);
+        } else {
+            errorContainer.setVisibility(View.VISIBLE);
+        }
     }
 
     private void init() {
         mArtists = new ArrayList<>();
         mAlbums = new ArrayList<>();
-        new LoadHttpGet().execute("http://i.img.co/data/data.json");
+        new LoadHttpGet().execute(JSONURL);
     }
 
     private void loadList() {
         mAdapter = new ArtistListAdapter(MainListActivity.this, mArtists, R.layout.list_item);
         mainList.setAdapter(mAdapter);
+    }
 
-//        ExpandableHeightGridView gridView = (ExpandableHeightGridView) findViewById(R.id.iv_gridView);
-//        gridView.setExpanded(true);
-//        AlbumGridAdapter adapter = new AlbumGridAdapter(this, mAlbums);
-//        gridView.setAdapter(adapter);
+    public void btnClick(View view) {
+        if (view.getId() == R.id.retryBtn) {
+            // Refresh the activity
+            recreate();
+        }
     }
 
     @Override
