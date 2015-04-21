@@ -1,5 +1,5 @@
 # Artist
-Unfinished
+Finished
 
 # Requirements
 Using the following URL: http://i.img.co/data/data.json
