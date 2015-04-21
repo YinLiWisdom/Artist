@@ -93,12 +93,12 @@ public class ImageLoader {
         return null;
     }
 
-    public Bitmap loadImage(ImageView imageView, String imageUrl) {
+    public Bitmap loadImage(ImageView imageView, String imageUrl, int width, int height) {
 
         Bitmap bitmap = getBitmapFromMem(imageUrl);
         if (bitmap != null) {
             Log.i(TAG, "Image exists in memory");
-            return bitmap;
+            return BitmapHelper.resizeBitmapByView(bitmap, width, height);
         }
 
         bitmap = getBitmapFromDisk(imageUrl);
@@ -106,12 +106,12 @@ public class ImageLoader {
             Log.i(TAG, "Image exists in file");
             // Try to put the bitmap into memory cache
             putBitmapToMem(imageUrl, bitmap);
-            return bitmap;
+            return BitmapHelper.resizeBitmapByView(bitmap, width, height);
         }
 
         // Download image from internet if it has not been cached
         if (!TextUtils.isEmpty(imageUrl)) {
-            new ImageDownloadTask(imageView).execute(imageUrl);
+            new ImageDownloadTask(imageView, width, height).execute(imageUrl);
         }
 
         return null;
@@ -120,9 +120,12 @@ public class ImageLoader {
     class ImageDownloadTask extends AsyncTask<String, Integer, Bitmap> {
         private String imageUrl;
         private final WeakReference<ImageView> mImageViewReference;
+        private int mWidth, mHeight;
 
-        public ImageDownloadTask(ImageView imageView) {
+        public ImageDownloadTask(ImageView imageView, int width, int height) {
             this.mImageViewReference = new WeakReference<ImageView>(imageView);
+            this.mWidth = width;
+            this.mHeight = height;
         }
 
         @Override
@@ -145,9 +148,9 @@ public class ImageLoader {
                 Bitmap bitmap = getBitmapFromDisk(imageUrl);
                 if (bitmap != null) {
                     putBitmapToMem(imageUrl, bitmap);
+                    return BitmapHelper.resizeBitmapByView(bitmap, mWidth, mHeight);
                 }
 
-                return bitmap;
             } catch (IOException e) {
                 Log.w(TAG, e.getMessage());
             }

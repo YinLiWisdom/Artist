@@ -29,6 +29,5 @@ public class BitmapHelper {
         }
 
         return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
-
     }
 }

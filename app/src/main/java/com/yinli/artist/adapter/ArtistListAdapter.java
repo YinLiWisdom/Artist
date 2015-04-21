@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.yinli.artist.R;
 import com.yinli.artist.data.Artist;
-import com.yinli.artist.util.BitmapHelper;
 import com.yinli.artist.util.ImageLoader;
 
 import java.util.ArrayList;
@@ -71,11 +70,10 @@ public class ArtistListAdapter extends BaseAdapter {
             holder.thumbnail.setTag(thumbUrl);
             holder.thumbnail.setImageResource(R.drawable.default_avatar);
             if (!TextUtils.isEmpty(thumbUrl)) {
-                Bitmap bitmap = mImageLoader.loadImage(holder.thumbnail, thumbUrl);
+                float width = mContext.getResources().getDimension(R.dimen.main_list_picture_width);
+                Bitmap bitmap = mImageLoader.loadImage(holder.thumbnail, thumbUrl, (int)width, 0);
                 if (bitmap != null) {
-                    float width = mContext.getResources().getDimension(R.dimen.main_list_picture_width);
-                    Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int)width, 0);
-                    holder.thumbnail.setImageBitmap(bmp);
+                    holder.thumbnail.setImageBitmap(bitmap);
                 }
             }
         }

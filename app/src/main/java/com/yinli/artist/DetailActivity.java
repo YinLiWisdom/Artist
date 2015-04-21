@@ -20,7 +20,6 @@ import com.yinli.artist.adapter.DetailPagerAdapter;
 import com.yinli.artist.data.Artist;
 import com.yinli.artist.ui.CustomGridView;
 import com.yinli.artist.ui.CustomViewPager;
-import com.yinli.artist.util.BitmapHelper;
 import com.yinli.artist.util.ImageLoader;
 
 
@@ -57,10 +56,9 @@ public class DetailActivity extends ActionBarActivity {
             public boolean onPreDraw() {
                 picture.getViewTreeObserver().removeOnPreDrawListener(this);
                 if (!TextUtils.isEmpty(mArtist.getPicture())) {
-                    Bitmap bitmap = new ImageLoader(DetailActivity.this).loadImage(picture, mArtist.getPicture());
+                    Bitmap bitmap = new ImageLoader(DetailActivity.this).loadImage(picture, mArtist.getPicture(), (int) picture.getWidth(), 0);
                     if (bitmap != null) {
-                        Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int) picture.getWidth(), 0);
-                        picture.setImageBitmap(bmp);
+                        picture.setImageBitmap(bitmap);
                     }
                 }
                 return true;

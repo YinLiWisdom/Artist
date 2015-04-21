@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.yinli.artist.R;
 import com.yinli.artist.data.Album;
-import com.yinli.artist.util.BitmapHelper;
 import com.yinli.artist.util.ImageLoader;
 
 import java.util.ArrayList;
@@ -81,11 +80,10 @@ public class AlbumGridAdapter extends BaseAdapter {
                     imageView.getLayoutParams().width = imageView.getWidth();
                     imageView.getLayoutParams().height = imageView.getWidth();
                     if (!TextUtils.isEmpty(thumbUrl)) {
-                        Bitmap bitmap = mImageLoader.loadImage(imageView, thumbUrl);
+                        Bitmap bitmap = mImageLoader.loadImage(imageView, thumbUrl, (int) imageView.getWidth(), 0);
                         if (bitmap != null) {
                             // trying to use a recycled bitmap
-                            Bitmap bmp = BitmapHelper.resizeBitmapByView(bitmap, (int) imageView.getWidth(), 0);
-                            imageView.setImageBitmap(bmp);
+                            imageView.setImageBitmap(bitmap);
                         }
                     }
 
