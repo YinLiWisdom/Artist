@@ -91,7 +91,6 @@ public class AlbumGridAdapter extends BaseAdapter {
                 }
             });
 
-
             holder.txt.setText(album.getTitle());
         }
         return view;

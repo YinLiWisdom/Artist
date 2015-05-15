@@ -57,6 +57,8 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
         mainList = (ListView) findViewById(R.id.artistList);
         errorContainer = (LinearLayout) findViewById(R.id.connectionErrorContainer);
         mainList.setOnItemClickListener(this);
+        mAdapter = new ArtistListAdapter(MainListActivity.this, mArtists, R.layout.list_item);
+        mainList.setAdapter(mAdapter);
 
         if (NetworkHelper.isNetworkConnected(this)) {
             errorContainer.setVisibility(View.INVISIBLE);
@@ -72,8 +74,7 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
     }
 
     private void loadList() {
-        mAdapter = new ArtistListAdapter(MainListActivity.this, mArtists, R.layout.list_item);
-        mainList.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
     }
 
     public void btnClick(View view) {
@@ -122,8 +123,10 @@ public class MainListActivity extends ActionBarActivity implements AdapterView.O
                     String strResult = EntityUtils.toString(httpResponse.getEntity());
                     if(!TextUtils.isEmpty(strResult) && strResult != null) {
                         JSONHelper helper = new JSONHelper();
-                        mArtists = helper.artistsJSONParser(strResult);
-                        mAlbums = helper.albumsJSONParser(strResult);
+                        mArtists.clear();
+                        mArtists.addAll(helper.artistsJSONParser(strResult));
+                        mAlbums.clear();
+                        mAlbums.addAll(helper.albumsJSONParser(strResult));
                         return true;
                     }
                 } else return false;
